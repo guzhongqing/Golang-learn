@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func main11() {
 	fmt.Println("Go 语言支持继承，但不是通过类继承，而是通过匿名结构体的嵌套来实现。")
 	type User struct {
 		Name string

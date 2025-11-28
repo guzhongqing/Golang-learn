@@ -14,7 +14,7 @@ func (mi User) hello() {
 	fmt.Println("Hello, my name is", mi.Name)
 }
 
-func main10() {
+func main13() {
 	var u User
 	// 结命名赋值法,没有赋值的字段会被初始化为默认值
 	u = User{
@@ -58,5 +58,34 @@ func main10() {
 
 	user := new(User) // new分配内存，创建空的结构体，返回指向User类型的指针
 	fmt.Println(user)
+
+	// 结构体嵌套
+	type Residence struct {
+		Province string
+		City     string
+	}
+	type Person struct {
+		Name      string
+		Age       int
+		Residence Residence
+		// 结构体其中可以包含指向自身类型的指针，实现类似链表，二叉树等数据结构，默认值为nil
+		Father *Person
+		// 匿名结构体
+		Contact struct {
+			Phone string
+			Email string
+		}
+	}
+	p := Person{
+		Name: "Eve",
+		Age:  28,
+		Residence: Residence{
+			Province: "California",
+			City:     "San Francisco",
+		},
+	}
+	fmt.Printf("%v\n", p)
+	fmt.Printf("%+v\n", p)
+	fmt.Printf("%#v\n", p)
 
 }
