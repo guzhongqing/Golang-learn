@@ -24,7 +24,7 @@ func arg1(a, b *int) {
 	*b = 888
 }
 
-func main() {
+func main21() {
 	fmt.Println(add1(1, 1))
 	fmt.Println(add2(1, 1))
 	fmt.Println(return1())
