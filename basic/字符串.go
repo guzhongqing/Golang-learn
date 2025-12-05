@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func main() {
+func main26() {
 	s1, s2, s3, s4 := "1", "2", "3", "4"
 	merged := strings.Join([]string{s1, s2, s3, s4}, "-")
 	fmt.Println(merged)
