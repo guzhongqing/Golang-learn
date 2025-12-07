@@ -20,9 +20,11 @@ func main() {
 	var p1 person
 	fmt.Println(p1)
 
+	// 调用指针方法，会修改外部结构体的Age字段
 	p1.personAgePlusForPointer()
 	fmt.Println(p1)
 
+	// 调用结构体方法，不会修改外部结构体的Age字段
 	p1.personAgePlusForStruct()
 	fmt.Println(p1)
 
