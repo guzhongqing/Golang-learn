@@ -47,7 +47,7 @@ func randBasic() {
 
 }
 
-func main() {
+func main53() {
 	// 调用 randBasic 函数
 	// randBasic()
 
