@@ -1,0 +1,3 @@
+{"time":"2025-12-12T20:53:07.4235054+08:00","level":"INFO","source":{"function":"golang_learn/go_basic/io.Slog","file":"d:/code/vscode/go_project/go_basic/io/log.go","line":28},"msg":"加法运算","a":1,"b":2,"sum:":3}
+{"time":"2025-12-12T20:53:07.4487836+08:00","level":"WARN","source":{"function":"golang_learn/go_basic/io.Slog","file":"d:/code/vscode/go_project/go_basic/io/log.go","line":29},"msg":"加法运算","a":1,"b":2,"sum:":3}
+{"time":"2025-12-12T20:53:07.4487836+08:00","level":"ERROR","source":{"function":"golang_learn/go_basic/io.Slog","file":"d:/code/vscode/go_project/go_basic/io/log.go","line":30},"msg":"加法运算","a":1,"b":2,"sum:":3}

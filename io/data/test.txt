@@ -1,0 +1,4 @@
+1.使用bufio写入第一行
+2.使用bufio写入第二行
+3.使用bufio写入第三行
+4.使用bufio写入 hello world
