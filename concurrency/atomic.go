@@ -123,11 +123,13 @@ func WLockExclusion() {
 	mu.Lock()         // 加写锁
 	defer mu.Unlock() // 释放写锁
 
-	// go func() {
-	// 	mu.RLock()         // 加读锁
-	// 	defer mu.RUnlock() // 释放读锁
-	// 	fmt.Println("子 goroutine 加读锁")
-	// }()
+	go func() {
+		mu.RLock()         // 加读锁
+		defer mu.RUnlock() // 释放读锁
+		// 长时间会导致子协程获取到锁时，主协程已经结束，子协程强制结束
+		// time.Sleep(2 * time.Second)
+		fmt.Println("子 goroutine 加读锁")
+	}()
 
 	// go func() {
 	// 	mu.Lock()         // 加写锁
@@ -135,15 +137,18 @@ func WLockExclusion() {
 	// 	fmt.Println("子 goroutine 加写锁")
 	// }()
 
+	// 死锁
 	// mu.RLock() // 加读锁
 	// fmt.Println("主协程 goroutine 加读锁")
 	// mu.RUnlock() // 释放读锁
 	// fmt.Println("当前 goroutine 释放读锁2")
 
-	//
-	mu.Lock()         // 加写锁
-	defer mu.Unlock() // 释放写锁
-	fmt.Println("当前 goroutine 加写锁")
+	// 死锁
+	// mu.Lock()         // 加写锁
+	// defer mu.Unlock() // 释放写锁
+	// fmt.Println("当前 goroutine 加写锁")
+	// time.Sleep(5 * time.Second)
+
 }
 
 func main() {
