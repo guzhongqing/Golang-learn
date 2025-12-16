@@ -13,6 +13,8 @@ var n int32 = 0
 func inc1() {
 	// 非原子操作
 	n++
+	// n=n+1也是非原子操作
+	// n += 1
 
 }
 
@@ -31,11 +33,11 @@ func Atomic() {
 			// defer fmt.Printf("协程 %d 结束\n ", i)
 
 			// 非原子操作
-			// inc1()
+			inc1()
 			// 原子操作
 			// inc2()
 			// 加锁操作
-			inc3()
+			// inc3()
 		}()
 	}
 	fmt.Printf("当前运行的 goroutine 数量：%d\n", runtime.NumGoroutine())
@@ -151,11 +153,11 @@ func WLockExclusion() {
 
 }
 
-func main() {
-	// Atomic()
-	// ReentranceRLock(3)
-	// ReentranceLock(3)
-	// RLockExclusion()
-	WLockExclusion()
+// func main() {
+// 	Atomic()
+// 	// ReentranceRLock(3)
+// 	// ReentranceLock(3)
+// 	// RLockExclusion()
+// 	// WLockExclusion()
 
-}
+// }
