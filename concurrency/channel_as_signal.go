@@ -45,7 +45,8 @@ func CountDownLatch() {
 	// 所有goroutine执行完毕
 	fmt.Println("所有goroutine执行完毕")
 }
-func main() {
-	// Broadcast()
-	CountDownLatch()
-}
+
+// func main() {
+// 	// Broadcast()
+// 	CountDownLatch()
+// }
