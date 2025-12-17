@@ -1,100 +1,132 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"math/rand/v2" // 替换为randv2
+	"math/rand/v2"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
-// 配置项（与原需求一致）
+// 配置项
 const (
-	targetDir    = "./data/biz_log" // 与处理程序目录一致
-	fileCount    = 10000            // 生成1.log ~ 10000.log
-	minLines     = 1                // 每个文件最少行数
-	maxLines     = 100              // 每个文件最多行数
+	targetDir    = "./data/biz_log" // 目标目录
+	fileCount    = 20000            // 总文件数(1.log~10000.log)
+	minLines     = 1                // 单文件最少行数
+	maxLines     = 30               // 单文件最多行数
 	minNum       = 1                // 数字最小值
 	maxNum       = 50               // 数字最大值
 	progressStep = 1000             // 每生成1000个文件打印进度
+	workerCount  = 4                // 优化：HDD设4~6，SSD设8~10（而非固定10）
 )
 
-// 全局随机数生成器（randv2推荐创建实例而非全局函数）
-var rng *rand.Rand
-
-// 初始化randv2生成器（保证每次运行生成不同数据）
-func init() {
-	// randv2不再使用Seed，而是通过New创建生成器，基于时间+随机数初始化种子
-	// NewPCG是randv2推荐的默认生成器（高性能、统计特性好）
-	rng = rand.New(rand.NewPCG(
-		uint64(time.Now().UnixNano()), // 种子1：当前时间戳
-		rand.Uint64(),                 // 种子2：随机64位整数
-	))
-}
-
-// 生成单个日志文件（randv2实现）
-func generateLogFile(filePath string) error {
-	// 创建文件（覆盖已有文件，权限0644）
-	file, err := os.Create(filePath)
+// 生成单个日志文件（优化：批量写入+bufio减少syscall）
+func generateLogFile(filePath string, rng *rand.Rand) error {
+	// 创建文件（O_CREATE|O_WRONLY|O_TRUNC 等价于os.Create，但显式控制）
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("创建文件%s失败: %v", filePath, err)
+		return fmt.Errorf("创建失败: %w", err)
 	}
 	defer file.Close()
 
-	// 随机生成当前文件的行数（1-100）：randv2.IntN与旧版行为一致（返回[0,n)的整数）
-	lineCount := rng.IntN(maxLines-minLines+1) + minLines
+	// 优化：用bufio.Writer缓冲写入，减少syscall次数（批量写内存，再刷到磁盘）
+	writer := bufio.NewWriterSize(file, 4096) // 4KB缓冲（匹配磁盘块大小）
+	defer writer.Flush()                      // 最后刷入磁盘
 
-	// 写入随机数字（每行一个）
+	// 随机行数(1-100)
+	lineCount := rng.IntN(maxLines-minLines+1) + minLines
+	var content []byte // 预分配内存，减少字符串拼接
+
+	// 批量拼接内容（内存操作，无IO）
 	for i := 0; i < lineCount; i++ {
-		// 生成1-50的随机整数
 		num := rng.IntN(maxNum-minNum+1) + minNum
-		// 写入文件（每行一个数字，换行符结尾）
-		_, err := fmt.Fprintln(file, num)
-		if err != nil {
-			return fmt.Errorf("写入文件%s第%d行失败: %v", filePath, i+1, err)
-		}
+		content = append(content, []byte(fmt.Sprintf("%d\n", num))...)
+	}
+
+	// 一次写入缓冲（仅1次syscall）
+	if _, err := writer.Write(content); err != nil {
+		return fmt.Errorf("写入失败: %w", err)
 	}
 
 	return nil
 }
 
-func main() {
-	// 1. 创建目标目录（不存在则创建，存在则忽略）
-	err := os.MkdirAll(targetDir, 0755)
-	if err != nil {
-		fmt.Printf("创建目标目录%s失败: %v\n", targetDir, err)
-		return
-	}
-	fmt.Printf("✅ 目标目录已准备好：%s\n", targetDir)
+// 工作协程（优化：减少日志打印频率，降低锁竞争）
+func worker(taskChan <-chan int, wg *sync.WaitGroup, progress *atomic.Int64, workerID int) {
+	defer wg.Done()
 
-	// 2. 批量生成10000个日志文件
-	fmt.Println("\n开始生成文件（共10000个）...")
-	startTime := time.Now()
+	// 每个协程独立rng（避免竞争）
+	rng := rand.New(rand.NewPCG(
+		uint64(time.Now().UnixNano())+uint64(workerID)*100, // 唯一种子
+		rand.Uint64()+uint64(workerID)*100,
+	))
 
-	for i := 1; i <= fileCount; i++ {
-		// 拼接文件路径（如 ./data/biz_log/1.log）
-		fileName := fmt.Sprintf("%d.log", i)
-		filePath := filepath.Join(targetDir, fileName)
+	for fileNum := range taskChan {
+		filePath := filepath.Join(targetDir, fmt.Sprintf("%d.log", fileNum))
 
-		// 生成当前文件
-		err := generateLogFile(filePath)
-		if err != nil {
-			fmt.Printf("⚠️  生成文件%s失败: %v\n", filePath, err)
+		if err := generateLogFile(filePath, rng); err != nil {
+			// 优化：仅每100个错误打印一次，避免刷屏+锁竞争
+			if fileNum%100 == 0 {
+				fmt.Printf("[协程%d] ⚠️  %s: %v\n", workerID, filePath, err)
+			}
 			continue
 		}
 
-		// 打印进度（每1000个文件一次）
-		if i%progressStep == 0 {
-			elapsed := time.Since(startTime).Seconds()
-			fmt.Printf("✅ 已生成%d/%d个文件，耗时%.2f秒\n", i, fileCount, elapsed)
+		// 原子更新进度
+		completed := progress.Add(1)
+		// 优化：仅让一个协程打印进度（减少stdout锁竞争）
+		if completed%progressStep == 0 && workerID == 1 {
+			fmt.Printf("[进度] ✅ 已生成%d/%d个文件\n", completed, fileCount)
 		}
 	}
-
-	// 3. 生成完成统计
-	totalElapsed := time.Since(startTime).Seconds()
-	fmt.Printf("\n🎉 所有文件生成完成！\n")
-	fmt.Printf("📂 生成目录：%s\n", targetDir)
-	fmt.Printf("📊 生成数量：%d个文件\n", fileCount)
-	fmt.Printf("⏱️  总耗时：%.2f秒\n", totalElapsed)
-	fmt.Printf("📝 文件规则：每个文件包含%d-%d行，每行是%d-%d的随机整数\n", minLines, maxLines, minNum, maxNum)
 }
+
+func runGenerateFile() {
+	// 1. 创建目标目录（优化：提前检查权限）
+	if err := os.MkdirAll(targetDir, 0755); err != nil {
+		fmt.Printf("创建目录失败: %v\n", err)
+		return
+	}
+	fmt.Printf("✅ 目标目录：%s\n", targetDir)
+
+	// 2. 初始化任务通道（优化：缓冲设为workerCount*100，匹配协程处理能力）
+	taskChan := make(chan int, workerCount*100)
+	var progress atomic.Int64
+	var wg sync.WaitGroup
+
+	// 3. 启动协程（优化：根据磁盘类型调整workerCount）
+	fmt.Printf("\n启动%d个协程生成%d个文件...\n", workerCount, fileCount)
+	startTime := time.Now()
+	wg.Add(workerCount)
+	for i := 0; i < workerCount; i++ {
+		go worker(taskChan, &wg, &progress, i+1)
+	}
+
+	// 4. 分发任务（优化：无缓冲分发，避免内存占用）
+	go func() {
+		for i := 1; i <= fileCount; i++ {
+			taskChan <- i
+		}
+		close(taskChan)
+	}()
+
+	// 5. 等待完成
+	wg.Wait()
+
+	// 6. 统计
+	totalElapsed := time.Since(startTime).Seconds()
+	fmt.Printf("\n🎉 生成完成！\n")
+	fmt.Printf("📊 数量：%d个文件 | ⚡️ 协程数：%d\n", fileCount, workerCount)
+	fmt.Printf("⏱️  总耗时：%.2f秒 | 📝 平均速度：%.0f文件/秒\n",
+		totalElapsed, float64(fileCount)/totalElapsed)
+	fmt.Printf("📝 规则：每个文件%d-%d行，每行%d-%d的整数\n", minLines, maxLines, minNum, maxNum)
+}
+
+// func main() {
+// 	// 优化：提前预热文件系统缓存（可选）
+// 	_, _ = os.Stat(targetDir)
+// 	runGenerateFile()
+// }

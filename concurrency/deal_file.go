@@ -22,9 +22,9 @@ const (
 
 var (
 	sum      int64
-	fileList = make(chan string, 100)
+	fileList = make(chan string, 1000)
 	// lineBuffer通道，用于存储读取的行内容
-	lineBuffer = make(chan string, 1000)
+	lineBuffer = make(chan string, 100)
 
 	walkWg    sync.WaitGroup
 	readWg    sync.WaitGroup
@@ -39,7 +39,7 @@ func walkDir(dir string) {
 		if err != nil {
 			return err
 		}
-		fmt.Println("需要处理的文件路径：", path)
+		// fmt.Println("需要处理的文件路径：", path)
 		// 只处理普通文件(如 .txt、.go、.jpg 等可读写的常规文件)
 		// 非普通文件(如目录、符号链接、管道、设备文件、套接字等)，则跳过
 		if !info.Mode().IsRegular() {
@@ -52,6 +52,8 @@ func walkDir(dir string) {
 }
 
 // 从fileList通道读取文件路径，读取文件内容发送到lineBuffer通道
+// 读文件是个耗时的io操作，所有会导致lineBuffer通道元素放入的速度很慢
+// 所以基本上一放入就会被processLine协程处理，所以每次都是'lineBuffer通道数量堆积了0行未处理'
 func readFile() {
 	defer readWg.Done()
 
