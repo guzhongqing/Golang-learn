@@ -18,7 +18,7 @@ func handle() {
 	defer func() {
 		<-qpsCh
 	}()
-
+	// 模拟接口调用耗时，qps限流之后网络请求、数据库操作，这些中间件的qps就会被限流到，但是该接口的qps是不受影响的
 	time.Sleep(1 * time.Second)
 	fmt.Println("接口调用结束")
 

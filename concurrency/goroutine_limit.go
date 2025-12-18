@@ -44,12 +44,10 @@ func GoroutineLimit() {
 
 	// 模拟工作协程
 	work := func() {
-		for {
-			// 模拟工作
-			time.Sleep(2 * time.Second)
-		}
+		// 模拟工作
+		time.Sleep(1 * time.Second)
 	}
-	const P = 10000
+	const P = 100
 	// 正常启动P个工作协程
 	// for i := 0; i < P; i++ {
 	// 	go work()
@@ -57,7 +55,7 @@ func GoroutineLimit() {
 
 	// 限流启动P个工作协程
 	// 创建一个限流结构体
-	g := NewGoroutineLimiter(100)
+	g := NewGoroutineLimiter(10)
 	for i := 0; i < P; i++ {
 		g.Run(work)
 	}
@@ -66,7 +64,6 @@ func GoroutineLimit() {
 	time.Sleep(10 * time.Second)
 }
 
-func main() {
-	GoroutineLimit()
-
-}
+// func main() {
+// 	GoroutineLimit()
+// }
