@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+// 定义Protobuf 自身的逻辑包名
+package idl.model;
+
+// 可选：指定生成 Go 代码时的包路径（仅针对 Go 语言）,grpc_model是生成的go代码的包名
+option go_package = "idl/model;grpc_model";
+
+// 定义学生消息体,message名称和里面的字段名称会在生成时自动转换为驼峰命名法
+message Student {
+  // 对应go语言中的string类型
+  string name = 2; 
+  // 对应go语言中的int64类型
+  int64 id = 1;
+  // 对应go语言中的[]string类型
+  repeated string locations = 5;
+  // 对应go语言中的map[string]string类型
+  map<string, string> scores = 6;
+  // 对应go语言中的bool类型
+  bool gender = 7;
+  // 对应go语言中的int32类型
+  int32 age = 3;
+  string email = 4;
+  // 对应go语言中的float32类型,double对应go语言中的float64类型
+  float score = 8;
+}
+
+// 生成go代码文件
+// 执行命令：protoc --go_out=./grpc --proto_path=./grpc/idl model/student.proto
+// 解释命令
+// --go_out=./grpc：指定生成的 Go 代码输出目录为 ./grpc
+// --proto_path=./grpc/idl：指定 proto 文件的搜索路径为 ./grpc/idl
+// model/student.proto：指定要编译的 proto 文件为 model/student.proto
+// --proto_path指定要编译的proto文件路径可以任意组合如--proto_path=./grpc/idl/model student.proto，--proto_path=./grpc idl/model/student.proto
+
+
