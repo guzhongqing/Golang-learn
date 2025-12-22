@@ -9,12 +9,11 @@
 package grpc_model
 
 import (
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
-
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -26,15 +25,22 @@ const (
 
 // 定义学生消息体,message名称和里面的字段名称会在生成时自动转换为驼峰命名法
 type Student struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Locations     []string               `protobuf:"bytes,5,rep,name=locations,proto3" json:"locations,omitempty"`
-	Scores        map[string]string      `protobuf:"bytes,6,rep,name=scores,proto3" json:"scores,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Gender        bool                   `protobuf:"varint,7,opt,name=gender,proto3" json:"gender,omitempty"`
-	Age           int32                  `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Score         float32                `protobuf:"fixed32,8,opt,name=score,proto3" json:"score,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 对应go语言中的string类型
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// 对应go语言中的int64类型
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// 对应go语言中的[]string类型
+	Locations []string `protobuf:"bytes,5,rep,name=locations,proto3" json:"locations,omitempty"`
+	// 对应go语言中的map[string]float32类型
+	Scores map[string]float32 `protobuf:"bytes,6,rep,name=scores,proto3" json:"scores,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed32,2,opt,name=value"`
+	// 对应go语言中的bool类型
+	Gender bool `protobuf:"varint,7,opt,name=gender,proto3" json:"gender,omitempty"`
+	// 对应go语言中的int32类型
+	Age   int32  `protobuf:"varint,3,opt,name=age,proto3" json:"age,omitempty"`
+	Email string `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	// 对应go语言中的float32类型,double对应go语言中的float64类型
+	Score         float32 `protobuf:"fixed32,8,opt,name=score,proto3" json:"score,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,7 +96,7 @@ func (x *Student) GetLocations() []string {
 	return nil
 }
 
-func (x *Student) GetScores() map[string]string {
+func (x *Student) GetScores() map[string]float32 {
 	if x != nil {
 		return x.Scores
 	}
@@ -141,7 +147,7 @@ const file_model_student_proto_rawDesc = "" +
 	"\x05score\x18\b \x01(\x02R\x05score\x1a9\n" +
 	"\vScoresEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x16Z\x14idl/model;grpc_modelb\x06proto3"
+	"\x05value\x18\x02 \x01(\x02R\x05value:\x028\x01B\x16Z\x14idl/model;grpc_modelb\x06proto3"
 
 var (
 	file_model_student_proto_rawDescOnce sync.Once
