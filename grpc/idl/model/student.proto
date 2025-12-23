@@ -7,7 +7,7 @@ package idl.model;
 option go_package = "idl/model;grpc_model";
 
 // 定义学生消息体,message名称和里面的字段名称会在生成时自动转换为驼峰命名法
-message Student {
+message student {
   // 对应go语言中的string类型
   string name = 2; 
   // 对应go语言中的int64类型
