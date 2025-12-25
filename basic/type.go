@@ -18,11 +18,18 @@ func (c Age) whistle(n int) int {
 	fmt.Println("Age whistle")
 	return 0
 }
+func (c *Age) test() {
+	fmt.Println("测试给结构体指针绑定方法")
 
-func main37() {
+}
+
+func main() {
 	var a int
 	var b Age
 	var c Tall
+	b.test()
+	(&b).test()
+
 
 	c = a + 10
 	b = Age(a) + 10 // 字面量不需要强制类型转换
