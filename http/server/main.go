@@ -13,7 +13,7 @@ func HttpObservation(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("请求URL：%s\n", r.URL)
 	// 获取请求参数
 	fmt.Printf("请求参数：%v\n", r.URL.Query())
-	// 获取请求参数
+	// 获取请求参数,这里Get方法获取的是map[key]切片的第一个值
 	name := r.URL.Query().Get("name")
 	age := r.URL.Query().Get("age")
 	fmt.Printf("name: %s, age: %s\n", name, age)

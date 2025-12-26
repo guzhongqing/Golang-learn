@@ -9,6 +9,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 func timer(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
@@ -25,7 +26,7 @@ func timer(ctx context.Context, method string, req, reply any, cc *grpc.ClientCo
 	return err
 }
 
-func conter(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+func counter(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	fmt.Printf("conter调用前\n")
 
 	// 调用原始方法
@@ -33,6 +34,12 @@ func conter(ctx context.Context, method string, req, reply any, cc *grpc.ClientC
 	fmt.Printf("method: %s\n", method)
 	fmt.Printf("conter调用后\n")
 
+	return err
+}
+
+func devKey(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	ctx = metadata.AppendToOutgoingContext(ctx, "dev-key", "123456")
+	err := invoker(ctx, method, req, reply, cc, opts...)
 	return err
 }
 
@@ -46,7 +53,7 @@ func main() {
 		// 客户端拦截器
 		// grpc.WithUnaryInterceptor(timer),
 		// 多个拦截器，链式调用，按顺序执行
-		grpc.WithChainUnaryInterceptor(timer, conter),
+		grpc.WithChainUnaryInterceptor(timer, counter, devKey),
 	)
 	if err != nil {
 		panic(err)
@@ -64,7 +71,7 @@ func main() {
 			req := grpc_service.QueryStudentRequest{
 				Id: 123,
 			}
-			// 单次调用设置接收消息大小为 1024 字节
+			// 可以单次调用设置接收消息大小为 1024 字节
 			resp, err := client.QueryStudent(context.Background(), &req, grpc.MaxCallRecvMsgSize(1024))
 			if err != nil {
 				panic(err)

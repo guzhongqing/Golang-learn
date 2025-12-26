@@ -29,7 +29,7 @@ message StudentId{
 service student{
     // Unary RPC
   rpc QueryStudent(QueryStudentRequest) returns (QueryStudentResponse);
-    // Server streaming RPC
+  //
   rpc QueryStudents1(StudentIds) returns (QueryStudentResponse);
      // Server streaming RPC
   rpc QueryStudents2(StudentIds) returns (stream idl.model.student);
@@ -54,7 +54,6 @@ service student{
 // protoc --go_out=./grpc --go_opt=Mmodel/student.proto=golang_learn/go_basic/grpc/idl/model --proto_path=./grpc/idl/service --proto_path=./grpc/idl student_service.proto
 // 再调用protoc-gen-go-grpc
 // protoc --go-grpc_out=./grpc --go-grpc_opt=Mmodel/student.proto=golang_learn/go_basic/grpc/idl/model --proto_path=./grpc/idl/service --proto_path=./grpc/idl student_service.proto
-
 
 // plugins=grpc插件写法已经废弃
 // protoc --go_out=plugins=grpc:./grpc --proto_path=./grpc/idl/service --proto_path=./grpc/idl --proto_path=./grpc/idl/include/ student_service.proto --go_opt=Mmodel/student.proto=dqq/go/basic/grpc/idl/model

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 func timer(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
@@ -26,7 +27,7 @@ func timer(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grp
 
 }
 
-func conter(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+func counter(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 	// 调用原始方法前，打印方法名
 	fmt.Printf("conter调用前\n")
 	fmt.Printf("method: %s\n", info.FullMethod)
@@ -39,6 +40,24 @@ func conter(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler gr
 	// 调用原始方法后，打印方法名
 	fmt.Printf("conter调用后\n")
 	return resp, nil
+}
+func devKey(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+	// 从上下文获取 dev-key 元数据
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("元数据不存在")
+	}
+	// 这里Get获取的是map[key]切片,如果metadata中没有dev-key,则返回空切片
+	devKeys := md.Get("dev-key")
+	if len(devKeys) == 0 {
+		return nil, fmt.Errorf("dev-key 元数据为空")
+	}
+	if devKeys[0] != "123456" {
+		return nil, fmt.Errorf("dev-key 校验失败")
+	}
+
+	resp, err = handler(ctx, req)
+	return resp, err
 
 }
 
@@ -52,7 +71,7 @@ func main() {
 	// 全局设置opts ...ServerOption
 	// server := grpc.NewServer(grpc.UnaryInterceptor(timer))
 	// 链式调用
-	server := grpc.NewServer(grpc.ChainUnaryInterceptor(timer, conter))
+	server := grpc.NewServer(grpc.ChainUnaryInterceptor(timer, counter, devKey))
 
 	// 注册 StudentServer 服务，可以注册多个service
 	grpc_service.RegisterStudentServer(server, Student{})

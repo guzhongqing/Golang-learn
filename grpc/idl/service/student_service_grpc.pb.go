@@ -36,7 +36,7 @@ const (
 type StudentClient interface {
 	// Unary RPC
 	QueryStudent(ctx context.Context, in *QueryStudentRequest, opts ...grpc.CallOption) (*QueryStudentResponse, error)
-	// Server streaming RPC
+	//
 	QueryStudents1(ctx context.Context, in *StudentIds, opts ...grpc.CallOption) (*QueryStudentResponse, error)
 	// Server streaming RPC
 	QueryStudents2(ctx context.Context, in *StudentIds, opts ...grpc.CallOption) (grpc.ServerStreamingClient[model.Student], error)
