@@ -14,8 +14,8 @@ message student {
   int64 id = 1;
   // 对应go语言中的[]string类型
   repeated string locations = 5;
-  // 对应go语言中的map[string]string类型
-  map<string, string> scores = 6;
+  // 对应go语言中的map[string]float32类型
+  map<string, float> scores = 6;
   // 对应go语言中的bool类型
   bool gender = 7;
   // 对应go语言中的int32类型
