@@ -34,11 +34,11 @@ func (s Student) QueryStudent(ctx context.Context, query *grpc_service.QueryStud
 }
 
 func (s Student) QueryStudents1(ctx context.Context, StudentIds *grpc_service.StudentIds) (resp *grpc_service.QueryStudentResponse, err error) {
-	fmt.Printf("QueryStudents1方法")
+	fmt.Printf("QueryStudents1方法\n")
 	return nil, nil
 }
 func (s Student) QueryStudents2(StudentIds *grpc_service.StudentIds, serverStream grpc.ServerStreamingServer[grpc_model.Student]) error {
-	fmt.Printf("QueryStudents2方法")
+	fmt.Printf("QueryStudents2方法\n")
 	for _, id := range StudentIds.Ids {
 		stu := &grpc_model.Student{
 			Id:   id,
@@ -53,7 +53,7 @@ func (s Student) QueryStudents2(StudentIds *grpc_service.StudentIds, serverStrea
 	return nil
 }
 func (s Student) QueryStudents3(clientStream grpc.ClientStreamingServer[grpc_service.StudentId, grpc_service.QueryStudentResponse]) error {
-	fmt.Printf("QueryStudents3方法")
+	fmt.Printf("QueryStudents3方法\n")
 	students := make([]*grpc_model.Student, 0, 10)
 	for {
 		stuId, err := clientStream.Recv()
@@ -78,7 +78,7 @@ func (s Student) QueryStudents3(clientStream grpc.ClientStreamingServer[grpc_ser
 
 }
 func (s Student) QueryStudents4(bidServer grpc.BidiStreamingServer[grpc_service.StudentId, grpc_model.Student]) error {
-	fmt.Printf("QueryStudents4方法")
+	fmt.Printf("QueryStudents4方法\n")
 	for {
 		stuId, err := bidServer.Recv()
 		if err != nil {
