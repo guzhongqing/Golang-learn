@@ -1,0 +1,5 @@
+{"time":"2025-12-30 22:11:05.824","biz":"search","公共字段":{"app":"myApp","env":"production"}}
+{"time":"2025-12-30 22:11:05.835","biz":"search","公共字段":{"app":"myApp","env":"production","ageKey":42}}
+{"time":"2025-12-30 22:11:05.835","biz":"search","公共字段":{"app":"myApp","env":"production","nameSpaceKey":{"nameKey":"nameValue"}}}
+{"time":"2025-12-30 22:11:05.835","biz":"search","公共字段":{"app":"myApp","env":"production"}}
+{"time":"2025-12-30 22:11:05.836","biz":"search","公共字段":{"app":"myApp","env":"production"}}
