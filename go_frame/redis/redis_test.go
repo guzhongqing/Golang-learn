@@ -2,10 +2,11 @@ package redis
 
 import (
 	"context"
+	"go_frame/io" // 使用模块相对路径导入io包
 	"testing"
 )
 
-var config = InitRedisViper("../conf", "redis", YAML)
+var config = InitRedisViper("../conf", "redis", io.YAML)
 var client = InitRedis(config)
 
 func TestInitRedis(t *testing.T) {
