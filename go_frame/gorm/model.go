@@ -16,7 +16,7 @@ import (
 // go的time.Time类型默认对应数据库的datetime类型,可以用type指定date,timestamp
 
 type User struct {
-	Id     int // gorm建表时会自动给ID/Id设置「自增主键」，不需要手动设置
+	Id     int `gorm:"primaryKey"` // gorm建表时会自动给ID/Id设置「自增主键」，不需要手动设置
 	UserId int `gorm:"column:uid"` // 对应数据库的uid字段
 	Degree string
 	// GORM 对结构体字段名的蛇形命名（snake_case） 转换规则是：大驼峰拆分为小写 + 下划线分隔，连续大写缩写（如 JSON）整体转小写
