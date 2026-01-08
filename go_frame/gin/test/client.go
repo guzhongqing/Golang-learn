@@ -1,10 +1,9 @@
-package client_test
+package main
 
 import (
 	"fmt"
 	"io"
 	"net/http"
-	"testing"
 )
 
 func processResponse(resp *http.Response) {
@@ -35,8 +34,7 @@ func Get(url string) {
 
 }
 
-func TestClient(t *testing.T) {
+func main() {
 	url := "http://127.0.0.1:8080/home"
 	Get(url)
-
 }

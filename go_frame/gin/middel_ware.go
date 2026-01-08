@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +26,7 @@ func homeHandler1(ctx *gin.Context) {
 
 	ctx.Header("Content-Type", "application/json")
 
-	ctx.String(200, "hello world")
+	ctx.String(http.StatusOK, "hello world")
 
 	ctx.JSON(200, gin.H{
 		"message": "hello world",
