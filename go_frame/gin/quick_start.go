@@ -9,12 +9,10 @@ import (
 func homeHandler(ctx *gin.Context) {
 	fmt.Println("homeHandler")
 	// 打印请求头
-	// 打印请求头
 	fmt.Println("请求头：")
 	for key, values := range ctx.Request.Header {
 		fmt.Println(key, values)
 	}
-	// 打印请求体
 	// 打印请求体
 	fmt.Println("请求体：")
 	fmt.Println(ctx.Request.Body)
@@ -39,12 +37,12 @@ func homeHandler(ctx *gin.Context) {
 
 }
 
-func main() {
-	engine := gin.Default()
-	// 注册路由
-	engine.GET("/home", homeHandler)
-	// 启动服务
-	if err := engine.Run("127.0.0.1:8080"); err != nil {
-		panic(err)
-	}
-}
+// func main() {
+// 	engine := gin.Default()
+// 	// 注册路由
+// 	engine.GET("/home", homeHandler)
+// 	// 启动服务
+// 	if err := engine.Run("127.0.0.1:8080"); err != nil {
+// 		panic(err)
+// 	}
+// }

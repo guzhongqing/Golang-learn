@@ -13,6 +13,8 @@ func processResponse(resp *http.Response) {
 		fmt.Printf("unexpected status code: %d", resp.StatusCode)
 	} else {
 		fmt.Printf("status code: %d\n", resp.StatusCode)
+		// 这里必须要关闭响应体，否则会导致内存泄漏
+		defer resp.Body.Close()
 		// 打印响应体
 		fmt.Println("响应体：")
 		all, err := io.ReadAll(resp.Body)
