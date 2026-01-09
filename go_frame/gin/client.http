@@ -1,4 +1,20 @@
 # 示例1：GET 请求（对应你的 /home 接口）
 GET http://127.0.0.1:8080/home
 
+### （分隔符，用于区分多个请求）
 
+# 示例2：POST 请求（带 JSON 体）
+POST http://127.0.0.1:8080/home
+Content-Type: application/json
+
+{
+  "name": "test",
+  "age": 18
+}
+
+###
+# postform
+POST http://127.0.0.1:8080/home
+Content-Type: application/x-www-form-urlencoded
+
+name=test&age=18
