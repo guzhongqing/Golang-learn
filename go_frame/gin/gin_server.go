@@ -1,6 +1,7 @@
 package main
 
 import (
+	model "go_frame/gin/idl"
 	"io"
 	"log/slog"
 	"net/http"
@@ -122,8 +123,8 @@ type Student struct {
 	// json绑定的是post json参数
 	// uri绑定的是路径参数
 	Name     string   `form:"username" json:"name" uri:"user" xml:"name" yaml:"name" `
-	Age      int      `form:"age" json:"age" uri:"age"`
-	Keywords []string `form:"keywords" json:"keywords" uri:"keywords"` // 可以绑定html的复选框checkbox
+	Age      int      `form:"age" json:"age" uri:"age" `
+	Keywords []string `form:"keywords" json:"keywords" uri:"keywords" ` // 可以绑定html的复选框checkbox
 }
 
 // 表单绑定参数
@@ -166,6 +167,7 @@ func UriBind(c *gin.Context) {
 // 使用ShouldBindBodyWith函数可以绑定任意格式的参数，比如json、XML、YAML、protobuf等
 func BodyBind(c *gin.Context) {
 	var stu Student
+	var stuPb model.Student
 	if err := c.ShouldBindBodyWith(&stu, binding.JSON); err == nil {
 		c.String(http.StatusOK, "获取到body参数:name="+stu.Name+",age="+strconv.Itoa(stu.Age)+",keywords="+strings.Join(stu.Keywords, ","))
 		return
@@ -182,8 +184,12 @@ func BodyBind(c *gin.Context) {
 		return
 	}
 	// 绑定protobuf参数
-	if err := c.ShouldBindBodyWith(&stu, binding.ProtoBuf); err == nil {
-		c.String(http.StatusOK, "获取到body参数:name="+stu.Name+",age="+strconv.Itoa(stu.Age)+",keywords="+strings.Join(stu.Keywords, ","))
+	if err := c.ShouldBindBodyWith(&stuPb, binding.ProtoBuf); err == nil {
+		// 打印请求头
+		slog.Info("绑定参数成功", "header", c.Request.Header)
+		slog.Info("绑定参数成功", "stuPb", &stuPb)
+
+		c.String(http.StatusOK, "获取到body参数:name="+stuPb.Name+",age="+strconv.Itoa(int(stuPb.Age)))
 		return
 	}
 }
@@ -205,6 +211,8 @@ func main() {
 	r.POST("/student/JsonBind", JsonBind)
 	// uri 绑定路径参数,路径参数是前缀优先的贪婪匹配机制，这里需要info，不然会和/student/:name/*ageother路由冲突
 	r.GET("/student/info/:user/:age/:keywords", UriBind)
+	// 绑定任意格式的参数，比如json、XML、YAML、protobuf等
+	r.POST("/student/BodyBind", BodyBind)
 
 	// 启动服务
 	r.Run("127.0.0.1:8080")

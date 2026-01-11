@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+// 使用相对路径
+option go_package = "./;model";
+
+
+// 定义学生消息体,message名称和里面的字段名称会在生成时自动转换为驼峰命名法
+message Student {
+  string name = 2; 
+  int32 age = 1;
+
+}
+
+// 生成go代码文件,并指定输出目录为./gin/idl,会在这个目录下面生成go_package对应目录
+// 执行命令：protoc --go_out=./gin/idl --proto_path=./gin/idl student.proto
+
+
+
