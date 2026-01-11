@@ -122,7 +122,8 @@ type Student struct {
 	// form绑定的是get查询参数和post表单参数
 	// json绑定的是post json参数
 	// uri绑定的是路径参数
-	Name     string   `form:"username" json:"name" uri:"user" xml:"name" yaml:"name" `
+	// binding:"required" 表示该字段是必填项,在ShouldBind函数中会校验
+	Name     string   `form:"username" json:"name" uri:"user" xml:"name" yaml:"name" binding:"required"`
 	Age      int      `form:"age" json:"age" uri:"age" `
 	Keywords []string `form:"keywords" json:"keywords" uri:"keywords" ` // 可以绑定html的复选框checkbox
 }
