@@ -36,3 +36,7 @@ concurrency/data/
 
 # 自定义规则：忽略conf文件夹
 conf/
+
+# # 自定义规则：忽略gin文件夹下的所有data相关文件
+gin/data/
+gin/datas/
