@@ -194,28 +194,28 @@ func BodyBind(c *gin.Context) {
 		return
 	}
 }
-func main() {
-	r := gin.Default()
-	r.GET("/student", QueryGet)
-	r.GET("/student/:name/*ageother", PathGet)
-	r.POST("/student", PostForm)
-	r.POST("/student/json", JsonPost)
-	// 设置表单上限8M，默认是32M
-	r.MaxMultipartMemory = 8 << 20
-	// 上传单个文件
-	r.POST("/student/uploadSingleFile", UploadSingleFile)
-	// 上传多个文件
-	r.POST("/student/uploadMultiFile", UploadMultiFile)
-	// 表单 绑定参数
-	r.POST("/student/FormBind", FormBind)
-	// json 绑定参数
-	r.POST("/student/JsonBind", JsonBind)
-	// uri 绑定路径参数,路径参数是前缀优先的贪婪匹配机制，这里需要info，不然会和/student/:name/*ageother路由冲突
-	r.GET("/student/info/:user/:age/:keywords", UriBind)
-	// 绑定任意格式的参数，比如json、XML、YAML、protobuf等
-	r.POST("/student/BodyBind", BodyBind)
+// func main() {
+// 	r := gin.Default()
+// 	r.GET("/student", QueryGet)
+// 	r.GET("/student/:name/*ageother", PathGet)
+// 	r.POST("/student", PostForm)
+// 	r.POST("/student/json", JsonPost)
+// 	// 设置表单上限8M，默认是32M
+// 	r.MaxMultipartMemory = 8 << 20
+// 	// 上传单个文件
+// 	r.POST("/student/uploadSingleFile", UploadSingleFile)
+// 	// 上传多个文件
+// 	r.POST("/student/uploadMultiFile", UploadMultiFile)
+// 	// 表单 绑定参数
+// 	r.POST("/student/FormBind", FormBind)
+// 	// json 绑定参数
+// 	r.POST("/student/JsonBind", JsonBind)
+// 	// uri 绑定路径参数,路径参数是前缀优先的贪婪匹配机制，这里需要info，不然会和/student/:name/*ageother路由冲突
+// 	r.GET("/student/info/:user/:age/:keywords", UriBind)
+// 	// 绑定任意格式的参数，比如json、XML、YAML、protobuf等
+// 	r.POST("/student/BodyBind", BodyBind)
 
-	// 启动服务
-	r.Run("127.0.0.1:8080")
+// 	// 启动服务
+// 	r.Run("127.0.0.1:8080")
 
-}
+// }
