@@ -103,6 +103,7 @@ func CreateConnection(config *viper.Viper) error {
 		log.Fatalf("获取数据库连接池失败: %v", err)
 		return err
 	}
+	log.Printf("✅ 数据库连接池配置: 最大打开连接数=100, 最大空闲连接数=10, 连接最大生命周期=1小时")
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetConnMaxLifetime(time.Hour)
@@ -112,6 +113,7 @@ func CreateConnection(config *viper.Viper) error {
 		log.Fatalf("数据库健康检查失败: %v", err)
 		return err
 	}
+	log.Printf("✅ 数据库健康检查通过")
 
 	// 无返回值，成功返回nil
 	return nil
