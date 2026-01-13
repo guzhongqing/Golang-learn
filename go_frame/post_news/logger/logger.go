@@ -39,26 +39,68 @@ func InitLogger(level string, logFile string) {
 		panic(fmt.Errorf("创建日志目录失败: %w", err))
 	}
 
-	// ========== 日志切割配置（核心，修复BUG1：赋值正确的日志文件路径） ==========
+	// ========== 日志切割配置 ==========
 	hook := lumberjack.Logger{
-		Filename:   logPath, // ✅ 正确：完整日志文件路径
+		Filename:   logPath, // 完整日志文件路径
 		MaxSize:    100,     // 单个日志文件最大100MB自动切割
 		MaxBackups: 30,      // 保留最多30个旧日志文件
 		MaxAge:     7,       // 日志文件保留7天自动清理
 		Compress:   true,    // 旧日志自动gzip压缩，节省磁盘
-		LocalTime:  true,    // 新增：切割日志的文件名使用本地时间，而非UTC时间
+		LocalTime:  true,    // 切割日志的文件名使用本地时间，而非UTC时间
 	}
 
-	// ========== zap编码器配置 ==========
+	// ========== zap 核心编码器配置 - 【每行注释+Debug模式生效/失效精准标注】 ==========
+	// 重要说明：
+	// 1. 生产环境(JSONEncoder)：以下配置 100% 全部生效 ✔️
+	// 2. 开发环境(ConsoleEncoder)：已开启 CapitalColorLevelEncoder 开关，标注如下：✅=生效 ❌=不生效(控制台编码器原生特性，无法修改)
 	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "time",
-		LevelKey:       "level",
-		CallerKey:      "caller", // 打印：包名/文件名:行号
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		EncodeLevel:    zapcore.CapitalLevelEncoder, // INFO/ERROR 大写
-		EncodeTime:     customTimeEncoder,           // 自定义时间格式
-		EncodeCaller:   zapcore.ShortCallerEncoder,  // 精简文件路径，不显示绝对路径
+		// time 字段的key名，最终日志里显示的时间字段名称
+		// Debug(控制台) ❌ 不生效：控制台日志直接把时间作为前缀展示，不会显示该key名，格式由EncodeTime控制
+		// JSON(生产)   ✅ 生效：日志中显示 "time": "2026-01-14 17:00:00.000"
+		TimeKey: "time",
+
+		// level 字段的key名，最终日志里显示的级别字段名称
+		// Debug(控制台) ❌ 不生效：控制台日志直接把级别作为前缀展示[INFO]，不会显示该key名，格式由EncodeLevel控制
+		// JSON(生产)   ✅ 生效：日志中显示 "level": "INFO"
+		LevelKey: "level",
+
+		// caller 字段的key名，最终日志里显示的调用栈行号字段名称
+		// Debug(控制台) ❌ 不生效：控制台日志直接在行尾展示行号，不会显示该key名，格式由EncodeCaller控制
+		// JSON(生产)   ✅ 生效：日志中显示 "caller": "service/user.go:25"
+		CallerKey: "caller",
+
+		// msg 字段的key名，最终日志里显示的业务日志内容字段名称
+		// Debug(控制台) ❌ 不生效：控制台日志直接展示日志内容，不会显示该key名
+		// JSON(生产)   ✅ 生效：日志中显示 "msg": "用户注册成功"
+		MessageKey: "msg",
+
+		// stacktrace 字段的key名，最终日志里显示的错误堆栈字段名称
+		// Debug(控制台) ❌ 不生效：控制台日志的堆栈直接追加在日志末尾，不会显示该key名
+		// JSON(生产)   ✅ 生效：日志中显示 "stacktrace": "xxx/xxx.go:xx +0x123"
+		// 生效条件：仅 Error/Panic 级别日志会打印堆栈
+		StacktraceKey: "stacktrace",
+
+		// 日志级别的格式化规则：CapitalLevelEncoder 表示日志级别全大写(DEBUG/INFO/WARN/ERROR/PANIC)
+		// Debug(控制台) ✅ 生效：控制台日志级别会显示大写，且结合开关显示对应颜色(DEBUG灰/INFO蓝/WARN黄/ERROR红)
+		// JSON(生产)   ✅ 生效：日志级别固定大写格式
+		EncodeLevel: zapcore.CapitalLevelEncoder,
+
+		// 日志时间的自定义格式化规则，绑定我们自己写的 customTimeEncoder 函数
+		// Debug(控制台) ✅ 生效：控制台日志的时间格式完全按照自定义的 2006-01-02 15:04:05.000 展示
+		// JSON(生产)   ✅ 生效：JSON日志的时间格式和自定义规则完全一致
+		// 【重中之重】：这是Debug模式下 最核心的必生效配置之一
+		EncodeTime: customTimeEncoder,
+
+		// 调用栈行号的格式化规则：ShortCallerEncoder 表示精简路径（包名/文件名:行号），不显示完整绝对路径
+		// Debug(控制台) ✅ 生效：控制台日志的行号展示为 例如 logger/logger.go:98 | service/user.go:25
+		// JSON(生产)   ✅ 生效：JSON日志的行号格式和配置一致
+		// 【重中之重】：这是Debug模式下 另一个必生效配置之一
+		EncodeCaller: zapcore.ShortCallerEncoder,
+
+		// 耗时字段的格式化规则：SecondsDurationEncoder 表示耗时以秒为单位展示
+		// Debug(控制台) ✅ 生效：如果日志中带耗时字段，会按秒级展示
+		// JSON(生产)   ✅ 生效：JSON日志的耗时格式一致
+		// 补充说明：该配置仅在使用 zap.WithDuration() 时生效，日常业务日志基本用不到，不影响核心功能
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 	}
 
@@ -89,13 +131,14 @@ func InitLogger(level string, logFile string) {
 		encoder = zapcore.NewJSONEncoder(encoderConfig) // 生产：JSON结构化，日志平台可解析
 	}
 
-	// ========== 构建zap日志核心 ==========
+	// ========== 构建zap日志核心 ✅【核心修复点1：添加 AddCallerSkip(1)】==========
 	core := zapcore.NewCore(encoder, writeSyncer, zapLevel)
-	Logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
+	// AddCallerSkip(1) 跳过1层封装函数，直接获取业务代码的真实调用位置
+	Logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1), zap.AddStacktrace(zapcore.ErrorLevel))
 	SugarLogger = Logger.Sugar()
 
-	// 初始化成功日志
-	Info("日志初始化成功 ✔️", "日志文件路径", logPath)
+	// ========== ✅【修复点2：初始化日志用原生对象，避免初始化行号错误】==========
+	SugarLogger.Info("✅日志初始化成功 ", "日志文件路径", logPath)
 }
 
 // customTimeEncoder 自定义日志时间格式 2006-01-02 15:04:05
@@ -103,9 +146,9 @@ func customTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
 
-// ===================== 核心封装：全局极简调用方法（重点！） =====================
+// ===================== 核心封装：全局极简调用方法（写法不变，无需修改） =====================
 // 所有方法支持 任意参数格式，和 zap.SugarLogger 用法完全一致
-// 示例：util.Info("用户注册成功", "userId", 100, "userName", "张三")
+// 示例：logger.Info("用户注册成功", "userId", 100, "userName", "张三")
 
 // Debug 调试日志 - 开发环境打印，生产环境关闭
 func Debug(args ...interface{}) {
@@ -132,8 +175,7 @@ func Panic(args ...interface{}) {
 	SugarLogger.Panic(args...)
 }
 
-// ===================== 带格式化的日志方法（可选，锦上添花） =====================
-// 支持 fmt.Sprintf 风格的格式化日志，按需使用
+// ===================== 带格式化的日志方法 =====================
 func Infof(format string, args ...interface{}) {
 	SugarLogger.Infof(format, args...)
 }
