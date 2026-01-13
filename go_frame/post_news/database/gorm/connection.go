@@ -96,7 +96,7 @@ func CreateConnection(config *viper.Viper) error {
 	// 赋值给全局DB变量，供外部调用
 	DB = conn
 
-	log.Printf("✅ mysql 连接成功: %s", dsn)
+	log.Printf("✅ mysql 连接成功")
 	// 设置数据库连接池
 	sqlDB, err := DB.DB()
 	if err != nil {
