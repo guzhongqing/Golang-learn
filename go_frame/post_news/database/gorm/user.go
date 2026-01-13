@@ -74,3 +74,41 @@ func LoginUser(name, password string) (model.User, error) {
 	user.Password = ""
 	return user, nil
 }
+
+// UpdatePassword 修改密码
+func UpdatePassword(id int, newPassword, oldPassword string) error {
+	// 根据ID查询用户
+	var user model.User
+	err := DB.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("用户不存在")
+		}
+		return errors.New("查询用户失败：" + err.Error())
+	}
+	// 校验旧密码是否匹配
+	if user.Password != oldPassword {
+		return errors.New("旧密码错误")
+	}
+
+	// 更新密码
+	user.Password = newPassword
+	if err := DB.Save(&user).Error; err != nil {
+		return errors.New("更新密码失败：" + err.Error())
+	}
+
+	return nil
+}
+
+// GetUserByID 根据ID查询用户
+func GetUserByID(id int) (model.User, error) {
+	var user model.User
+	err := DB.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.User{}, errors.New("用户不存在")
+		}
+		return model.User{}, errors.New("查询用户失败：" + err.Error())
+	}
+	return user, nil
+}
