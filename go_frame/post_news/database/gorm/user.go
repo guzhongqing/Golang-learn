@@ -3,7 +3,7 @@ package gorm
 import (
 	"errors"
 	"go_frame/post_news/database/model"
-	"log/slog"
+	"go_frame/post_news/logger"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +15,7 @@ func RegisterUser(name, password string) (int, error) {
 	err := DB.Model(&model.User{}).Where("name = ?", name).Count(&count).Error
 	// 优先判断：数据库查询是否发生错误（连接失败/超时等）
 	if err != nil {
-		slog.Error("查询用户名失败", "name", name, "err", err)
+		logger.Error("查询用户名失败", "name", name, "err", err)
 		return 0, errors.New("查询用户名失败：" + err.Error())
 	}
 	// 再判断：用户名是否已存在
@@ -36,6 +36,22 @@ func RegisterUser(name, password string) (int, error) {
 
 	// ===== 优化3：返回原生uint类型的ID，避免类型转换隐患 =====
 	return user.ID, nil
+}
+
+// 用户注销
+// LogOffUser 用户注销
+func LogOffUser(id int) error {
+	// 根据ID删除用户
+	tx := DB.Delete(&model.User{ID: id})
+	if err := tx.Error; err != nil {
+		logger.Error("用户注销失败", "id", id, "err", err)
+		return errors.New("用户注销失败：" + err.Error())
+	}
+	// 检查是否有影响的行数
+	if tx.RowsAffected == 0 {
+		return errors.New("用户注销失败：用户不存在")
+	}
+	return nil
 }
 
 // LoginUser 用户登录

@@ -73,10 +73,10 @@ func CreateConnection(config *viper.Viper) error {
 	newLogger := logger.New(
 		log.New(logFile, "\r\n", log.LstdFlags),
 		logger.Config{
-			SlowThreshold:        500 * time.Millisecond,
-			LogLevel:             logger.Info,
-			ParameterizedQueries: false,
-			Colorful:             false, // 写入文件必须关闭彩色，防止乱码
+			SlowThreshold:        500 * time.Millisecond, // SQL执行耗时超过500ms 标记为慢SQL，单独打印警告
+			LogLevel:             logger.Info,            // 日志级别：Info=打印 所有SQL+慢SQL+错误SQL
+			ParameterizedQueries: true,                   // ✅ 开启后：SQL日志中 用「真实参数」替换「?占位符」
+			Colorful:             false,                  // ✅ 写入日志文件必须关闭彩色，防止文件乱码（控制台可以开）
 		},
 	)
 
