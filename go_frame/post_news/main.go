@@ -61,7 +61,7 @@ func main() {
 		apiGroup.POST("/login", handler.LoginUser)
 		apiGroup.POST("/logout", handler.LogOutUser)
 		// API路径同样使用短横线分隔，与HTML路由风格统一
-		apiGroup.POST("/modifyPassword", handler.ModifyPassword)
+		apiGroup.POST("/modify-password", handler.ModifyPassword)
 	}
 
 	// 启动服务（地址格式规范，无需修改）
