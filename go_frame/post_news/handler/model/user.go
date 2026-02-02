@@ -6,7 +6,7 @@ type LoginUserReq struct {
 }
 
 type ModifyPassReq struct {
-	Uid         int    `json:"uid" binding:"required"`
+	// Uid         int    `json:"uid" binding:"required"`
 	OldPassword string `json:"old_password" binding:"required,len=32"`
 	NewPassword string `json:"new_password" binding:"required,len=32"`
 }
