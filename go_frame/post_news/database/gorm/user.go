@@ -65,9 +65,13 @@ func LoginUser(name, password string) (model.User, error) {
 	if err != nil {
 		// 查不到用户 或 数据库错误
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return model.User{}, errors.New("用户名或密码错误")
+			return model.User{}, errors.New("用户名不存在")
 		}
 		return model.User{}, errors.New("查询用户失败：" + err.Error())
+	}
+	// 校验密码是否匹配
+	if user.Password != password {
+		return model.User{}, errors.New("密码错误")
 	}
 
 	// 登录成功，返回用户信息（注意：不要返回密码字段）
