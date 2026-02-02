@@ -5,6 +5,7 @@ import (
 	handler "go_frame/post_news/handler/gin"
 	"go_frame/post_news/logger"
 	"go_frame/post_news/util"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,17 +30,40 @@ func Init() {
 func main() {
 	Init()
 	r := gin.Default()
-	// 注册静态资源，将  ./views/js 目录下的文件映射到 浏览器/js 路径
+
+	// 1. 注册静态资源：路径规范（已符合，无需修改）
 	r.Static("/js", "./views/js")
 	r.Static("/css", "./views/css")
+	// 加载HTML模板：若后续模板有子目录，可改为 ./views/html/**/*
 	r.LoadHTMLGlob("./views/html/*")
 
-	// 注册路由
-	r.POST("/register", handler.RegisterUser)
-	r.POST("/login", handler.LoginUser)
-	r.POST("/logout", handler.LogOutUser)
-	r.POST("/modify_password", handler.ModifyPassword)
+	// 2. 分组注册：HTML页面路由（前台页面）
+	htmlGroup := r.Group("/")
+	{
+		// 路径改为短横线分隔（kebab-case），状态码使用http标准常量
+		htmlGroup.GET("/login", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "login.html", nil)
+		})
+		htmlGroup.GET("/register", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "register.html", nil)
+		})
+		// 路径改为短横线分隔，渲染对应的修改密码模板（需新建modify-password.html）
+		htmlGroup.GET("/modify-password", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "modify-password.html", nil)
+		})
+	}
 
-	r.Run("localhost:8080")
+	// 3. 分组注册：API接口路由（统一/api前缀）
+	apiGroup := r.Group("/api")
+	{
+		// 路径补全/前缀，统一为/api/xxx风格，保持命名一致
+		apiGroup.POST("/register", handler.RegisterUser)
+		apiGroup.POST("/login", handler.LoginUser)
+		apiGroup.POST("/logout", handler.LogOutUser)
+		// API路径同样使用短横线分隔，与HTML路由风格统一
+		apiGroup.POST("/modifyPassword", handler.ModifyPassword)
+	}
 
+	// 启动服务（地址格式规范，无需修改）
+	_ = r.Run("localhost:8080")
 }
